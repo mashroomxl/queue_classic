@@ -90,14 +90,15 @@ module QC
 
   def self.log_yield(data)
     begin
+      log(data.merge(:action => "starting"))
       t0 = Time.now
       yield
     rescue => e
-      log({:level => :error, :error => e.class, :message => e.message.strip}.merge(data))
+      log(data.merge({:level => :error, :action => "failed", :error => e.class, :message => e.message.strip}))
       raise
     ensure
       t = Integer((Time.now - t0)*1000)
-      log(data.merge(:elapsed => t)) unless e
+      log(data.merge(:elapsed => t, :action => "done")) unless e
     end
   end
 

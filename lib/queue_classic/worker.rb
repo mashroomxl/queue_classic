@@ -119,15 +119,15 @@ module QC
       @semaphore.acquire # reserve a thread
       if job = lock_job
         @pool.submit do
-          QC.log_yield(:level => :info, :action => "work_job", :job => job[:id]) do
+          QC.log_yield(:level => :info, :action => "work_job", :job => job_description(job)) do
             begin
-              retval = call(job)
+              call(job)
             rescue Object => e
-              log(:level => :debug, :action => "failed_work", :job => job[:id], :error => e.inspect)
+              log(:level => :error, :action => "failed_work", :job => job_description(job), :error => e.inspect)
               handle_failure(job, e)
             ensure
               @queue.delete(job[:id])
-              log(:level => :debug, :action => "delete_job", :job => job[:id])
+              log(:level => :debug, :action => "delete_job", :job => job_description(job))
             end
           end
         end
@@ -153,7 +153,7 @@ module QC
             break
           end
         else
-          log(:level => :debug, :action => "finished_lock", :job => job[:id])
+          log(:level => :debug, :action => "finished_lock", :job => job_description(job))
         end
       end
       job
@@ -178,6 +178,10 @@ module QC
         log(:level => :debug, :action => "sleep_wait", :wait => t)
         Kernel.sleep(t)
       end
+    end
+
+    def job_description(job_hash)
+      "#{job_hash[:method]}(#{job_hash[:args].join(',')}) job_id=#{job_hash[:id]}"
     end
 
     #override this method to do whatever you want
