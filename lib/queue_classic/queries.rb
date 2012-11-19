@@ -28,6 +28,13 @@ module QC
       r["count"].to_i
     end
 
+    def job_count(q_name, method, args)
+      s = "SELECT COUNT(*) FROM #{TABLE_NAME}"
+      s << QC.replace_params(" WHERE q_name = $1 AND method = $2 and args = $3 and locked_at IS NULL")
+      r = Conn.execute(s, q_name, method, OkJson.encode(args))
+      r["count"].to_i
+    end
+
     def delete(id)
       Conn.execute(QC.replace_params("DELETE FROM #{TABLE_NAME} where id = $1::integer"), id)
     end

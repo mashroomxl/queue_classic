@@ -9,6 +9,14 @@ class QueueTest < QCTest
     QC.enqueue("Klass.method")
   end
 
+  def test_enqueue_if_not_queued
+    QC.enqueue_if_not_queued("Klass.method", "arg1", "arg2")
+    QC.enqueue_if_not_queued("Klass.method", "arg1", "arg2")
+    QC.lock
+    QC.enqueue_if_not_queued("Klass.method", "arg1", "arg2")
+    assert_equal(1, QC.job_count("Klass.method", "arg1", "arg2"))
+  end
+
   def test_lock
     QC.enqueue("Klass.method")
     expected = {:id=>"1", :method=>"Klass.method", :args=>[]}
@@ -22,6 +30,17 @@ class QueueTest < QCTest
   def test_count
     QC.enqueue("Klass.method")
     assert_equal(1, QC.count)
+  end
+
+  def test_job_count
+    #Should return the count of unstarted jobs that match both method and arguments
+    QC.enqueue("Klass.method", "arg1", "arg2")
+    QC.enqueue("Klass.method", "arg1", "arg2")
+    QC.enqueue("Klass.method", "arg1", "arg2")
+    QC.enqueue("Klass.method", "arg3", "arg4")
+    QC.enqueue("Klass.other_method", "arg1", "arg2")
+    QC.lock  #start the first job
+    assert_equal(2, QC.job_count("Klass.method", "arg1", "arg2"))
   end
 
   def test_delete
