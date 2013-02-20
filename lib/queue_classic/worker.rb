@@ -100,6 +100,8 @@ module QC
     end
 
     def start
+      QC.kill_zombies
+
       while running?
         if fork_worker?
           fork_and_work

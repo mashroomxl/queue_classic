@@ -24,10 +24,35 @@ class TestWorker < QC::Worker
   end
 end
 
-
-
 class WorkerTest < QCTest
+  def test_start_kills_zombies
+    QC.enqueue("TestObject")
+    QC.lock
 
+    worker = TestWorker.new
+    worker.instance_variable_set(:@running, false)
+
+    assert_equal(1, QC.job_count("TestObject"))
+    worker.start
+    assert_equal(0, QC.job_count("TestObject"))
+  end
+
+  def test_kill_zombies_deletes_running_jobs
+    QC.enqueue("TestObject")
+    QC.lock
+
+    assert_equal(1, QC.job_count("TestObject"))
+    QC.kill_zombies
+    assert_equal(0, QC.job_count("TestObject"))
+  end
+
+  def test_kill_zombies_does_not_delete_enqueued_jobs
+    QC.enqueue("TestObject")
+
+    assert_equal(1, QC.job_count("TestObject"))
+    QC.kill_zombies
+    assert_equal(1, QC.job_count("TestObject"))
+  end
 
   def test_work
     QC.enqueue("TestObject.no_args")

@@ -36,5 +36,8 @@ module QC
       Queries.job_count(name, method, args)
     end
 
+    def kill_zombies
+      Queries.kill_zombies
+    end
   end
 end

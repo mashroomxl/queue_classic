@@ -45,5 +45,10 @@ module QC
       Conn.execute(*[s, q_name].compact)
     end
 
+    def kill_zombies
+      s = "DELETE FROM #{TABLE_NAME} WHERE locked_at IS NOT NULL"
+      Conn.execute(s)
+    end
+
   end
 end
