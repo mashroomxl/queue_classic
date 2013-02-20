@@ -9,12 +9,22 @@ class QueueTest < QCTest
     QC.enqueue("Klass.method")
   end
 
-  def test_enqueue_if_not_queued
+  def test_enqueue_if_not_queued_does_not_enqueue_jobs_already_in_queue
     QC.enqueue_if_not_queued("Klass.method", "arg1", "arg2")
     QC.enqueue_if_not_queued("Klass.method", "arg1", "arg2")
     QC.lock
     QC.enqueue_if_not_queued("Klass.method", "arg1", "arg2")
     assert_equal(1, QC.job_count("Klass.method", "arg1", "arg2"))
+  end
+
+  def test_enqueue_if_not_queued_does_not_enqueue_jobs_already_in_progress
+    QC.enqueue_if_not_queued("Klass.method", "arg1", "arg2")
+    job_was_enqueued = !!QC.lock
+    assert(job_was_enqueued)
+
+    QC.enqueue_if_not_queued("Klass.method", "arg1", "arg2")
+    job_was_enqueued = !!QC.lock
+    assert(!job_was_enqueued)
   end
 
   def test_lock
@@ -33,14 +43,14 @@ class QueueTest < QCTest
   end
 
   def test_job_count
-    #Should return the count of unstarted jobs that match both method and arguments
+    #Should return the count of started and unstarted jobs that match both method and arguments
     QC.enqueue("Klass.method", "arg1", "arg2")
     QC.enqueue("Klass.method", "arg1", "arg2")
     QC.enqueue("Klass.method", "arg1", "arg2")
     QC.enqueue("Klass.method", "arg3", "arg4")
     QC.enqueue("Klass.other_method", "arg1", "arg2")
     QC.lock  #start the first job
-    assert_equal(2, QC.job_count("Klass.method", "arg1", "arg2"))
+    assert_equal(3, QC.job_count("Klass.method", "arg1", "arg2"))
   end
 
   def test_delete
