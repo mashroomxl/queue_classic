@@ -6,7 +6,7 @@ Gem::Specification.new do |s|
   s.date          = "2012-02-29"
   s.description   = "queue_classic is a queueing library for Ruby apps. (Rails, Sinatra, Etc...) queue_classic features asynchronous job polling, database maintained locks and no ridiculous dependencies. As a matter of fact, queue_classic only requires pg."
   s.summary       = "postgres backed queue"
-  s.authors       = ["Ryan Smith (♠ ace hacker)"]
+  s.authors       = ["Ryan Smith (ace hacker)"]
   s.homepage      = "http://github.com/ryandotsmith/queue_classic"
   s.license       = "MIT"
 
